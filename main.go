@@ -88,11 +88,22 @@ func generateRandomPosition(maxX, maxY int) Position {
 
 // newGameHandler creates a new game with the given width and height
 func newGameHandler(w http.ResponseWriter, r *http.Request) {
-	width := parseQueryParam(r, "w")
-	height := parseQueryParam(r, "h")
+	width, err := strconv.Atoi(chi.URLParam(r, "w"))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("Invalid width: %s", err.Error())))
+		return
+	}
+	height, err := strconv.Atoi(chi.URLParam(r, "h"))
+	if err != nil {
+		http.Error(w, "Invalid height", http.StatusBadRequest)
+		return
+	}
 
 	if width <= 0 || height <= 0 {
-		http.Error(w, "Invalid width or height", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf(
+			"Invalid width or height: width=%d, height=%d", width, height)))
 		return
 	}
 
