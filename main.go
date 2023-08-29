@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -192,12 +194,11 @@ func jsonResponseWithStatus(w http.ResponseWriter, response any, statusCode int)
 }
 
 func main() {
-	rand.New(rand.NewSource(time.Now().UnixNano()))
+	r := chi.NewRouter()
+	r.Use(middleware.Logger)
 
-	http.HandleFunc("/new", newGameHandler)
-	http.HandleFunc("/validate", validateHandler)
+	r.Get("/new", newGameHandler)
+	r.Post("/validate", validateHandler)
 
-	port := ":8080"
-	fmt.Printf("Listening on port %s\n", port)
-	http.ListenAndServe(port, nil)
+	http.ListenAndServe(":8080", r)
 }
